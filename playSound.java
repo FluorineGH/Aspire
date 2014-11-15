@@ -27,17 +27,19 @@ public class playSound {
     Clip clip = (Clip) AudioSystem.getLine(info);
     clip.open(sound);
 
-    // due to bug in Java Sound, explicitly exit the VM when
+/*  Leaving this section in stops the JVM as soon as a sound plays... not good.
+    
+    //due to bug in Java Sound, explicitly exit the VM when
     // the sound has stopped.
     clip.addLineListener(new LineListener() {
       public void update(LineEvent event) {
         if (event.getType() == LineEvent.Type.STOP) {
           event.getLine().close();
-          //System.exit(0);
         }
       }
     });
-
+*/
+    
     // play the sound clip
     clip.start();
   }
