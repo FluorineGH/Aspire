@@ -10,12 +10,15 @@ import javax.swing.JFrame;
 
 public class Aspire extends JFrame {
 
+    static String VERSION = "Version 1.1";
+    
     public Aspire() {
+        
         add(new ABoard());
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(720, 800);
         setLocationRelativeTo(null);
-        setTitle("Aspire ~ Version 1.0");
+        setTitle("Aspire ~ " + VERSION);
         setResizable(false);
         setVisible(true);
     }

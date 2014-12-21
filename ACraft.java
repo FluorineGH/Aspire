@@ -20,7 +20,7 @@ public class ACraft {
     private int width;
     private int height;
     private int weapon, beams;
-    private boolean visible;
+    private boolean visible, missile;
     private Image image1, image2, image3, image4;
     private ArrayList bullets, missiles, lasers;
     private int anim = 0;
@@ -39,7 +39,7 @@ public class ACraft {
         visible = true;
         x = 360;
         y = 700;
-        beams = 100;
+        beams = 0;
     }
     
     public void move(){
@@ -63,12 +63,24 @@ public class ACraft {
         return y;
     }
     
+    public void setX(){
+        x = 360;
+    }   
+    
+    public void setY(){
+        y = 700;
+    }
+    
     public int getBeams(){
         return beams;
     }
     
-    public void resetBeams(){
-        beams = 100;
+    public void setBeams(){
+        beams = 0;
+    }
+    
+    public void addBeams(){
+        beams += 100;
     }
     
     public Image getImage(){
@@ -81,6 +93,8 @@ public class ACraft {
     }
     
     public void setWeapon(int w){
+        if(w == 0) return;
+        if(w == 1) missile = true;        
         weapon = w;
     }
     
@@ -124,28 +138,55 @@ public class ACraft {
             else ABoard.PAUSE = false;
          }
         
-        if (key == KeyEvent.VK_SPACE) {
-            fire();
-            if(ABoard.INGAME == false && ABoard.INIT.length()<3) ABoard.INIT+=ABoard.letters[ABoard.init];
-            
+        if (key == KeyEvent.VK_ESCAPE) {
+            if(ABoard.SPLASH == true){
+                ABoard.SPLASH = false;
+                ABoard.INGAME = true;
+            }else {
+                if(ABoard.PAUSE == false) ABoard.PAUSE = true;
+                else ABoard.PAUSE = false;
+            }
+        }
+        
+        if (key == KeyEvent.VK_SPACE) {           
+            fire();           
+            if(ABoard.INGAME == false && ABoard.INIT.length()<3){
+               ABoard.INIT+=ABoard.letters[ABoard.init];
+               ABoard.count++;
+            }           
+        }
+        
+        if (key == KeyEvent.VK_BACK_SPACE) {                                  
+            if(ABoard.INGAME == false && ABoard.INIT.length()<3 && ABoard.INIT.length() > 0){
+               ABoard.INIT = ABoard.INIT.substring(0,ABoard.INIT.length()-1);
+               ABoard.count--;
+            }           
         }
         
         if (key == KeyEvent.VK_LEFT) {
-            dx = -8;
+            if(ABoard.INGAME == true){ 
+                dx = -8;
+            }
         }
         
         if (key == KeyEvent.VK_RIGHT) {
-            dx = 8;
+            if(ABoard.INGAME == true){
+                dx = 8;
+            }
         }
         
-        if (key == KeyEvent.VK_UP) {           
-            dy = -8;    
+        if (key == KeyEvent.VK_UP) {
+            if(ABoard.INGAME == true){
+                dy = -8;    
+            }
             if(ABoard.INGAME == false && ABoard.init < 26) ABoard.init++;
             if(ABoard.INGAME == false && ABoard.init == 26) ABoard.init = 0;
         }
         
         if (key == KeyEvent.VK_DOWN) {
-            dy = 8;
+            if(ABoard.INGAME == true){
+                dy = 8;
+            }
             if(ABoard.INGAME == false && ABoard.init > 0) ABoard.init--;
             if(ABoard.INGAME == false && ABoard.init == 0) ABoard.init = 25;
         }        
@@ -166,7 +207,10 @@ public class ACraft {
                         ABoard.playSound(ABoard.laser);
                         lasers.add(new ALaser(x,y));
                         beams--;
-                        if(beams == 0) weapon = 0;                       
+                        if(beams == 0){
+                            weapon = 0;
+                            if(missile == true) weapon = 1;
+                        }                       
                     }
                         
                     break;

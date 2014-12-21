@@ -18,12 +18,15 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
 import java.util.Random;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 import javax.swing.ImageIcon;
@@ -38,6 +41,7 @@ public class ABoard extends JPanel implements ActionListener {
     static int LIVES = 2;
     static boolean PAUSE = false;
     static boolean INGAME = false;
+    static boolean SPLASH = true;
     private boolean LEVEL2, LEVEL3, LEVEL4 = false;
     private int stars = 1;
     Random r = new Random();
@@ -60,7 +64,9 @@ public class ABoard extends JPanel implements ActionListener {
         "Y","Z"
     };
     static int init = 0;
-    static String INIT = "";           
+    static int count = 0;
+    static String INIT = "";
+    static boolean HIGH = false;
     File scorecard;
     List<AScore> scores;
     
@@ -71,8 +77,8 @@ public class ABoard extends JPanel implements ActionListener {
         setDoubleBuffered(true);       
         setSize(720,800);
         loadImg();
-        loadSound();        
-        INGAME = true;
+        loadSound();
+        SPLASH = true;
         starz = new ArrayList();
         craft = new ACraft();        
         aliens = new ArrayList();
@@ -82,17 +88,15 @@ public class ABoard extends JPanel implements ActionListener {
         timer.start();
         
         // Score stuff
-//        try{AScore AS = new AScore();}catch(Exception e){System.err.println("AScore messed up");}
         scores = new ArrayList<>();
         String txtLoc = ".\\src\\aspire\\scorecard.txt";
         scorecard = new File(txtLoc);
     }
     
-   
      public void paint(Graphics g) {
         super.paint(g);
         Graphics2D g2d = (Graphics2D)g;
-        
+                
         // Draw Stars
         if(drawstars == true) {
             for (int i = 0; i < starz.size(); i++) {
@@ -101,6 +105,28 @@ public class ABoard extends JPanel implements ActionListener {
                     g2d.drawImage(a.getImage(), a.getX(), a.getY(), this);
             }
         }        
+        
+        if(SPLASH == true){
+            g2d.setFont(new Font("Helvetica", Font.BOLD, 70));
+            g2d.setColor(Color.red);
+            g2d.drawString("Welcome to Aspire", 40, 120);
+            g2d.setFont(new Font("Helvetica", Font.BOLD, 16));
+            g2d.drawString(Aspire.VERSION, 300, 150);
+            g2d.setColor(Color.blue);
+            g2d.setFont(new Font("Helvetica", Font.BOLD, 50));
+            g2d.drawString("Written by J~Cal", 150, 210);
+            g2d.setColor(Color.cyan);
+            g2d.setFont(new Font("Helvetica", Font.BOLD, 30));
+            g2d.drawString("Arrow Keys to MOVE", 200, 300);
+            g2d.drawString("Spacebar to FIRE", 225, 350);
+            g2d.drawString("ESCAPE or Z to Pause", 195, 400);
+            g2d.drawString("Q to QUIT", 280, 450);
+            // Start Game
+            g2d.setColor(Color.green);
+            g2d.setFont(new Font("Helvetica", Font.BOLD, 50));
+            g2d.drawString("Hit Esc to START", 150, 600);
+            return;
+        }
         
         if(INGAME == true) {
             
@@ -178,7 +204,9 @@ public class ABoard extends JPanel implements ActionListener {
                 missileMax = 10;
                 LIVES-=1;
                 frameStep = 0;
-                craft.resetBeams();
+                craft.setBeams();
+                craft.setX();
+                craft.setY();                        
             }
             
         }
@@ -188,7 +216,7 @@ public class ABoard extends JPanel implements ActionListener {
         g2d.setColor(Color.blue);
         g2d.drawString("SCORE: " + SCORE, 5, 20);
         g2d.setColor(Color.WHITE);
-        g2d.drawString("Level: " + LEVEL, 135, 20);
+        g2d.drawString("Level: " + LEVEL, 150, 20);
         g2d.drawString("Lives: " + LIVES, 240, 20);
         g2d.drawString("Max Missiles: " + missileMax, 340, 20);
         g2d.drawString("Laserbolts left: " + craft.getBeams(), 520, 20);
@@ -199,6 +227,11 @@ public class ABoard extends JPanel implements ActionListener {
      }
         
     public void actionPerformed(ActionEvent e) {
+        if(SPLASH == true){
+            repaint();
+            return;
+        }
+        
         // Pause on Z key
         if(PAUSE == true) timer.stop();             
         
@@ -220,7 +253,7 @@ public class ABoard extends JPanel implements ActionListener {
             LEVEL = 4;
         }
         
-        if(ONEUP>5000){
+        if(ONEUP > 5000){
             LIVES++;
             ONEUP-=5000;
         }       
@@ -396,8 +429,8 @@ public class ABoard extends JPanel implements ActionListener {
                 p.setVisible(false);
                 SCORE+=50;
                 ONEUP+=50;
-                if(p.getT()==1) missileMax++;
-                if(p.getT()==2) craft.resetBeams();                
+                if(p.getT()==1) missileMax += 2;
+                if(p.getT()==2) craft.addBeams();                
             }
         }
          // Check Bomb - Craft collision
@@ -474,52 +507,64 @@ public class ABoard extends JPanel implements ActionListener {
     }
     
     private void scoreCard(Graphics2D g){
-    // Grab the High Score list from file
+        // Grab the High Score list from file
         if(scores.size() == 0) readScores();
-        System.out.println("INIT: " + INIT);
-     // Print old High Score List       
+        
+        // Print old High Score List       
         g.setFont(new Font("Arial", Font.BOLD, 20));
         g.setColor(Color.red);
         g.drawString("HIGH SCORES", 50, 250);
-        g.setColor(Color.orange);
-        
+        g.setColor(Color.orange);        
         for(int i = 0;i<scores.size();i++) {
             AScore as = (AScore)scores.get(i);
+            if(as.getScore() == SCORE) g.setColor(Color.cyan);
+            else g.setColor(Color.orange);
             g.drawString(as.getName(), 50, 300+i*30);
             g.drawString(Integer.toString(as.getScore()), 140, 300+i*30);
         }
 
         // Check if current score qualifies
-        if(SCORE > scores.get(scores.size()-1).getScore()){            
+        if(HIGH == false && SCORE > scores.get(scores.size()-1).getScore()){
+            int place = 0;
+            for(int i = 0;i < scores.size();i++){
+                if(SCORE > scores.get(i).getScore()){
+                    place = i;
+                    break;
+                }
+            }
             g.setFont(new Font("Arial", Font.BOLD, 20));
             g.setColor(Color.green);
             g.drawString("You have a new high score!", 350, 250);
             //Get Initials
             g.drawString("Enter your initials:", 350,300);
             g.setColor(Color.blue);
-            g.drawString(INIT, 350,400);
-            g.setColor(Color.green);
-            g.drawString(letters[init], 300,350);
-            if(INIT.length() == 3) {                    
-                scores.add(new AScore(INIT,SCORE));
-                Collections.sort(scores);
-                scores.remove(8);
-                
-                g.setColor(Color.orange);
-        
+            g.setFont(new Font("Arial", Font.BOLD, 36));
+            g.drawString(letters[init], 550,305);
+            g.drawString(INIT, 380,380);
+            
+            if(count == 3) {                    
+                scores.add(place,new AScore(INIT,SCORE));
+                scores.remove(scores.size()-1);
+                // Repaint new High Scores
+                g.setFont(new Font("Arial", Font.BOLD, 20));
+                g.setColor(Color.orange);        
                 for(int i = 0;i<scores.size();i++) {
                     AScore as = (AScore)scores.get(i);
+                    if(as.getScore() == SCORE) g.setColor(Color.cyan);
+                    else g.setColor(Color.orange);
                     g.drawString(as.getName(), 50, 300+i*30);
                     g.drawString(Integer.toString(as.getScore()), 140, 300+i*30);
                 }
+                setScores();
+                HIGH = true;    
             }
              
         }
     }
    
     private void readScores(){       
-        String name = "";
-        String score = "";
+        String name;
+        String score;
         try{
             Scanner s = new Scanner(new BufferedReader(new FileReader(scorecard)));       
             for(int i=0;i<8;i++){
@@ -527,12 +572,29 @@ public class ABoard extends JPanel implements ActionListener {
                 score = s.next();
                 scores.add(new AScore(name,Integer.parseInt(score)));
             }      
-        } catch(IOException e){
-            e.printStackTrace();
-            System.err.println("IO Error");
+        } catch(FileNotFoundException e){
+            System.err.println("IO Error: File not found");
         }
     }
    
+    private void setScores(){
+        String name;
+        String score;
+        try{
+            Writer output = new BufferedWriter(new FileWriter(scorecard));
+            for(int i = 0;i<8;i++){
+                name = scores.get(i).getName() + "\n";
+                score = Integer.toString(scores.get(i).getScore()) + "\n";
+                output.write(name);
+                output.write(score);
+            }
+            output.close();
+        } catch(IOException e){
+            e.printStackTrace();
+            System.err.println("IO Error of some kind in setScores");
+        }
+    }
+    
     private void quit(){
         timer.stop();        
         System.exit(0);
