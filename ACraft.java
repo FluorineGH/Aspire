@@ -125,7 +125,9 @@ public class ACraft {
          }
         
         if (key == KeyEvent.VK_SPACE) {
-            fire();           
+            fire();
+            if(ABoard.INGAME == false && ABoard.INIT.length()<3) ABoard.INIT+=ABoard.letters[ABoard.init];
+            
         }
         
         if (key == KeyEvent.VK_LEFT) {
@@ -137,11 +139,15 @@ public class ACraft {
         }
         
         if (key == KeyEvent.VK_UP) {           
-            dy = -8;           
+            dy = -8;    
+            if(ABoard.INGAME == false && ABoard.init < 26) ABoard.init++;
+            if(ABoard.INGAME == false && ABoard.init == 26) ABoard.init = 0;
         }
         
         if (key == KeyEvent.VK_DOWN) {
-            dy = 8;            
+            dy = 8;
+            if(ABoard.INGAME == false && ABoard.init > 0) ABoard.init--;
+            if(ABoard.INGAME == false && ABoard.init == 0) ABoard.init = 25;
         }        
     }
     

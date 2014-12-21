@@ -15,7 +15,7 @@ public class Aspire extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(720, 800);
         setLocationRelativeTo(null);
-        setTitle("Aspire");
+        setTitle("Aspire ~ Version 1.0");
         setResizable(false);
         setVisible(true);
     }

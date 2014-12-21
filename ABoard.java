@@ -17,12 +17,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.geom.Rectangle2D;
+import java.io.BufferedReader;
 import java.io.File;
-import java.net.URL;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Random;
 import java.util.ArrayList;
-import javax.sound.sampled.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Scanner;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.Timer;
@@ -34,7 +37,8 @@ public class ABoard extends JPanel implements ActionListener {
     static int SCORE, ONEUP = 0;
     static int LIVES = 2;
     static boolean PAUSE = false;
-    private boolean INGAME, LEVEL2, LEVEL3, LEVEL4= false;
+    static boolean INGAME = false;
+    private boolean LEVEL2, LEVEL3, LEVEL4 = false;
     private int stars = 1;
     Random r = new Random();
     private ArrayList starz, aliens, prizes, bombs;
@@ -46,6 +50,19 @@ public class ABoard extends JPanel implements ActionListener {
     private int frameStep = 0;
     
     static String boom, prize, bullet, missile, laser, level2, level3, level4;
+    
+    // Scores stuff
+    static String [] letters = {
+        "A","B","C","D","E","F",
+        "G","H","I","J","K","L",
+        "M","N","O","P","Q","R",
+        "S","T","U","V","W","X",
+        "Y","Z"
+    };
+    static int init = 0;
+    static String INIT = "";           
+    File scorecard;
+    List<AScore> scores;
     
     public ABoard() {
         addKeyListener(new TAdapter());
@@ -60,11 +77,18 @@ public class ABoard extends JPanel implements ActionListener {
         craft = new ACraft();        
         aliens = new ArrayList();
         prizes = new ArrayList();
-        bombs = new ArrayList();       
+        bombs = new ArrayList();        
         timer = new Timer(52-LEVEL*2,this);
         timer.start();
+        
+        // Score stuff
+//        try{AScore AS = new AScore();}catch(Exception e){System.err.println("AScore messed up");}
+        scores = new ArrayList<>();
+        String txtLoc = ".\\src\\aspire\\scorecard.txt";
+        scorecard = new File(txtLoc);
     }
     
+   
      public void paint(Graphics g) {
         super.paint(g);
         Graphics2D g2d = (Graphics2D)g;
@@ -103,7 +127,7 @@ public class ABoard extends JPanel implements ActionListener {
                 g2d.drawImage(b.getImage(), b.getX(), b.getY(), this);
         }
         
-        // Draw MIssiles
+        // Draw Missiles
         ArrayList ms = craft.getMissiles();       
         for (int i = 0; i < ms.size(); i++) {
                 AMissile m = (AMissile)ms.get(i);
@@ -143,8 +167,11 @@ public class ABoard extends JPanel implements ActionListener {
                 INGAME = false;
                 g2d.setFont(new Font("Helvetica", Font.BOLD, 70));
                 g2d.setColor(Color.red);
-                g2d.drawString("GAME OVER", 220, 250);
-                g2d.drawString("SCORE: " + SCORE, 240, 350);              
+                g2d.drawString("GAME OVER", 140, 120);
+                g2d.drawString("SCORE: " + SCORE, 150, 200);
+                
+                scoreCard(g2d);
+                
             } else {
                 INGAME = true;
                 craft.setVisible(true);
@@ -197,6 +224,8 @@ public class ABoard extends JPanel implements ActionListener {
             LIVES++;
             ONEUP-=5000;
         }       
+        
+        
         
         // Set Stars
         initStars();
@@ -435,7 +464,7 @@ public class ABoard extends JPanel implements ActionListener {
         
     }
     
-   static void playSound(String s){
+    static void playSound(String s){
         playSound Play = new playSound();
         try{
         Play.play(s);
@@ -444,6 +473,66 @@ public class ABoard extends JPanel implements ActionListener {
         }
     }
     
+    private void scoreCard(Graphics2D g){
+    // Grab the High Score list from file
+        if(scores.size() == 0) readScores();
+        System.out.println("INIT: " + INIT);
+     // Print old High Score List       
+        g.setFont(new Font("Arial", Font.BOLD, 20));
+        g.setColor(Color.red);
+        g.drawString("HIGH SCORES", 50, 250);
+        g.setColor(Color.orange);
+        
+        for(int i = 0;i<scores.size();i++) {
+            AScore as = (AScore)scores.get(i);
+            g.drawString(as.getName(), 50, 300+i*30);
+            g.drawString(Integer.toString(as.getScore()), 140, 300+i*30);
+        }
+
+        // Check if current score qualifies
+        if(SCORE > scores.get(scores.size()-1).getScore()){            
+            g.setFont(new Font("Arial", Font.BOLD, 20));
+            g.setColor(Color.green);
+            g.drawString("You have a new high score!", 350, 250);
+            //Get Initials
+            g.drawString("Enter your initials:", 350,300);
+            g.setColor(Color.blue);
+            g.drawString(INIT, 350,400);
+            g.setColor(Color.green);
+            g.drawString(letters[init], 300,350);
+            if(INIT.length() == 3) {                    
+                scores.add(new AScore(INIT,SCORE));
+                Collections.sort(scores);
+                scores.remove(8);
+                
+                g.setColor(Color.orange);
+        
+                for(int i = 0;i<scores.size();i++) {
+                    AScore as = (AScore)scores.get(i);
+                    g.drawString(as.getName(), 50, 300+i*30);
+                    g.drawString(Integer.toString(as.getScore()), 140, 300+i*30);
+                }
+            }
+             
+        }
+    }
+   
+    private void readScores(){       
+        String name = "";
+        String score = "";
+        try{
+            Scanner s = new Scanner(new BufferedReader(new FileReader(scorecard)));       
+            for(int i=0;i<8;i++){
+                name = s.next();
+                score = s.next();
+                scores.add(new AScore(name,Integer.parseInt(score)));
+            }      
+        } catch(IOException e){
+            e.printStackTrace();
+            System.err.println("IO Error");
+        }
+    }
+   
     private void quit(){
         timer.stop();        
         System.exit(0);
