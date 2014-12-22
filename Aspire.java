@@ -10,7 +10,7 @@ import javax.swing.JFrame;
 
 public class Aspire extends JFrame {
 
-    static String VERSION = "Version 1.2";
+    static String VERSION = "Version 1.3";
     
     public Aspire() {
         

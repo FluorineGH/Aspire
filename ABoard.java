@@ -67,7 +67,7 @@ public class ABoard extends JPanel implements ActionListener {
     static int count = 0;
     static String INIT = "";
     static boolean HIGH = false;
-    File scorecard;
+    File dirCheck, scorecard;
     List<AScore> scores;   
     
     public ABoard() {
@@ -88,8 +88,13 @@ public class ABoard extends JPanel implements ActionListener {
         timer.start();
         
         // Score stuff
-        scores = new ArrayList<>();        
-        scorecard = new File(System.getProperty("user.dir"),"scorecard.txt");
+        scores = new ArrayList<>();
+        File dirCheck = new File("K:\\Table Games\\Chipper\\java");
+        if(dirCheck.exists()) scorecard = new File("K:\\Table Games\\Chipper\\java","scorecard.txt");
+        else {
+            System.out.println("DIRECTORY DOES NOT EXIST! Using current DIR.");
+            scorecard = new File(System.getProperty("user.dir"),"scorecard.txt");
+        }        
     }
     
      public void paint(Graphics g) {
@@ -585,21 +590,21 @@ public class ABoard extends JPanel implements ActionListener {
             Writer output = new BufferedWriter(new FileWriter(scorecard));
             if(scores.size() == 0){
                 output.write("JCAL" + eol);
-                output.write("800" + eol);
+                output.write("8000" + eol);
                 output.write("IS" + eol);
-                output.write("700" + eol);
+                output.write("7000" + eol);
                 output.write("THE" + eol);
-                output.write("600" + eol);
+                output.write("6000" + eol);
                 output.write("BEST" + eol);
-                output.write("500" + eol);
+                output.write("5000" + eol);
                 output.write("OMG" + eol);
-                output.write("400" + eol);
+                output.write("4000" + eol);
                 output.write("SO" + eol);
-                output.write("300" + eol);
+                output.write("3000" + eol);
                 output.write("WOW" + eol);
-                output.write("200" + eol);
+                output.write("2000" + eol);
                 output.write("YAY!" + eol);
-                output.write("100" + eol);
+                output.write("1000" + eol);
                 output.close();
                 readScores();
                 return;
