@@ -52,7 +52,7 @@ public class ABoard extends JPanel implements ActionListener {
     private Image[] img = new Image[7];
     private int frames = 0;
     private int frameStep = 0;
-    
+   
     static String boom, prize, bullet, missile, laser, level2, level3, level4;
     
     // Scores stuff
@@ -68,7 +68,7 @@ public class ABoard extends JPanel implements ActionListener {
     static String INIT = "";
     static boolean HIGH = false;
     File scorecard;
-    List<AScore> scores;
+    List<AScore> scores;   
     
     public ABoard() {
         addKeyListener(new TAdapter());
@@ -88,9 +88,8 @@ public class ABoard extends JPanel implements ActionListener {
         timer.start();
         
         // Score stuff
-        scores = new ArrayList<>();
-        String txtLoc = ".\\src\\aspire\\scorecard.txt";
-        scorecard = new File(txtLoc);
+        scores = new ArrayList<>();        
+        scorecard = new File(System.getProperty("user.dir"),"scorecard.txt");
     }
     
      public void paint(Graphics g) {
@@ -457,9 +456,8 @@ public class ABoard extends JPanel implements ActionListener {
     
     private void initAliens(){
         // Set Aliens        
-        if(aliens.size()< 10)
-            stars = r.nextInt(650)+30;
-            for(int i=0;i<(10-aliens.size());i++){
+        if(aliens.size()< 10) stars = r.nextInt(650)+30;
+        for(int i=0;i<(10-aliens.size());i++){
             aliens.add(new AAlien(stars,-10,LEVEL));
         }
     }
@@ -509,12 +507,12 @@ public class ABoard extends JPanel implements ActionListener {
     private void scoreCard(Graphics2D g){
         // Grab the High Score list from file
         if(scores.size() == 0) readScores();
-        
         // Print old High Score List       
         g.setFont(new Font("Arial", Font.BOLD, 20));
         g.setColor(Color.red);
         g.drawString("HIGH SCORES", 50, 250);
         g.setColor(Color.orange);        
+
         for(int i = 0;i<scores.size();i++) {
             AScore as = (AScore)scores.get(i);
             if(as.getScore() == SCORE) g.setColor(Color.cyan);
@@ -560,6 +558,7 @@ public class ABoard extends JPanel implements ActionListener {
             }
              
         }
+        
     }
    
     private void readScores(){       
@@ -573,25 +572,49 @@ public class ABoard extends JPanel implements ActionListener {
                 scores.add(new AScore(name,Integer.parseInt(score)));
             }      
         } catch(FileNotFoundException e){
-            System.err.println("IO Error: File not found");
+            System.err.println("IO Error: File not found. Generating new scores!");
+            setScores();
         }
     }
    
     private void setScores(){
+        String eol = System.getProperty("line.separator");
         String name;
         String score;
         try{
             Writer output = new BufferedWriter(new FileWriter(scorecard));
+            if(scores.size() == 0){
+                output.write("JCAL" + eol);
+                output.write("800" + eol);
+                output.write("IS" + eol);
+                output.write("700" + eol);
+                output.write("THE" + eol);
+                output.write("600" + eol);
+                output.write("BEST" + eol);
+                output.write("500" + eol);
+                output.write("OMG" + eol);
+                output.write("400" + eol);
+                output.write("SO" + eol);
+                output.write("300" + eol);
+                output.write("WOW" + eol);
+                output.write("200" + eol);
+                output.write("YAY!" + eol);
+                output.write("100" + eol);
+                output.close();
+                readScores();
+                return;
+            }
             for(int i = 0;i<8;i++){
-                name = scores.get(i).getName() + "\n";
-                score = Integer.toString(scores.get(i).getScore()) + "\n";
+                name = scores.get(i).getName() + eol;
+                score = Integer.toString(scores.get(i).getScore()) + eol;
                 output.write(name);
                 output.write(score);
             }
             output.close();
         } catch(IOException e){
-            e.printStackTrace();
+            e.printStackTrace();            
             System.err.println("IO Error of some kind in setScores");
+            return;
         }
     }
     
