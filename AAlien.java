@@ -8,7 +8,6 @@ package aspire;
 
 import java.awt.Image;
 import java.awt.Rectangle;
-import java.util.ArrayList;
 import java.util.Random;
 import javax.swing.ImageIcon;
 
@@ -19,6 +18,7 @@ public class AAlien {
     private int height;
     private boolean visible;
     private Image alien00, alien01, alien02, alien10, alien11, alien12, alien20, alien21, alien22;
+    private Image mother0, mother1, mother2, mother3;
     private int LEVEL = 0;
     private boolean flip = false;
     private int anim, fire = 0;
@@ -34,8 +34,15 @@ public class AAlien {
         alien20 = new ImageIcon(this.getClass().getResource("img/alien20.png")).getImage();
         alien21 = new ImageIcon(this.getClass().getResource("img/alien21.png")).getImage();
         alien22 = new ImageIcon(this.getClass().getResource("img/alien22.png")).getImage();
+        
+        mother0 = new ImageIcon(this.getClass().getResource("img/mother0.png")).getImage();
+        mother1 = new ImageIcon(this.getClass().getResource("img/mother1.png")).getImage();
+        mother2 = new ImageIcon(this.getClass().getResource("img/mother2.png")).getImage();
+        mother3 = new ImageIcon(this.getClass().getResource("img/mother3.png")).getImage();
         width = alien00.getWidth(null);
         height = alien00.getHeight(null);
+        if(l == 7) width = 250;
+        if(l == 7) height = 80;
         visible = true;
         this.x = x;
         this.y = y;
@@ -139,24 +146,40 @@ public class AAlien {
                     if(y > 800) y = -20;
                         if(x>540){
                         flip = true;
-                        x-=7;
+                        x-=fire;
                         y+=15;
                         break;
                     }else if(x<200){
                         flip = false;
-                        x+=7;
+                        x+=fire;
                         y+=15;
                         break;
                     }else if(flip == true){
-                        x-=7;
+                        x-=fire;
                         y+=15;
                         break;
                     } else if(flip == false){
-                        x+=7;
+                        x+=fire;
                         y+=15;
                         break;
                     } 
+             case 7: if(x>450){
+                        flip = true;
+                        x-=10;
+                         break;
+                    }else if(x<20){
+                        flip = false;
+                        x+=10;
+                        break;
+                    }else if(flip == true){
+                        x-=10;
+                        break;
+                    } else if(flip == false){
+                        x+=10;
+                       break;
+                    }
         }
+        
         // Step Animation
         anim++;
         if(anim >3) anim = 0;
@@ -206,6 +229,16 @@ public class AAlien {
             }
           }
           
+          if(LEVEL == 7) {
+             switch(anim){
+                case 0: return mother0;
+                case 1: return mother1;
+                case 2: return mother2;
+                case 3: return mother3;
+                default: return mother0;
+            }
+          }
+                    
           else return alien00;
     }
 

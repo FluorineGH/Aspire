@@ -93,8 +93,8 @@ public class ACraft {
     }
     
     public void setWeapon(int w){
-        if(w == 0) return;
-        if(w == 1) missile = true;        
+        if(weapon > w) return;
+        if(w == 1) missile = true;       
         weapon = w;
     }
     
@@ -119,7 +119,7 @@ public class ACraft {
     }
 
     public Rectangle getBounds() {
-        return new Rectangle(x, y+5, width-5, height);
+        return new Rectangle(x+5, y+5, width-10, height-10);
     }
     
     public void boom(){
@@ -150,7 +150,7 @@ public class ACraft {
         
         if (key == KeyEvent.VK_SPACE) {           
             fire();           
-            if(ABoard.INGAME == false && ABoard.INIT.length()<3){
+            if(ABoard.END == true && ABoard.INIT.length()<3){
                ABoard.INIT+=ABoard.letters[ABoard.init];
                ABoard.count++;
             }           
@@ -160,7 +160,11 @@ public class ACraft {
             if(ABoard.INGAME == false && ABoard.INIT.length()<3 && ABoard.INIT.length() > 0){
                ABoard.INIT = ABoard.INIT.substring(0,ABoard.INIT.length()-1);
                ABoard.count--;
-            }           
+            }    
+            if(ABoard.BOSSTRIG == true) {
+                ABoard.BOSS = 500;
+                ABoard.INGAME = false;
+            }
         }
         
         if (key == KeyEvent.VK_LEFT) {
@@ -199,8 +203,8 @@ public class ACraft {
                     break;
             case 1: if(missiles.size()<ABoard.missileMax){
                     ABoard.playSound(ABoard.missile);
-                    missiles.add(new AMissile(x + width-4, y+10)); 
-                    missiles.add(new AMissile(x, y+10));
+                    missiles.add(new AMissile(x + 22, y+10)); 
+                    missiles.add(new AMissile(x - 1, y+10));
                     }
                     break;
             case 2: if(lasers.size() < 5){                       
