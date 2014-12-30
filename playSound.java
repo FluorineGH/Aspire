@@ -7,41 +7,21 @@
 package aspire;
 
 import java.io.*;
+import java.net.URL;
 import javax.sound.sampled.*;
 
 public class playSound {
-    
-    
+   
     public playSound(){
         
     }
     
-    public void play(String s) throws Exception {      
-    // specify the sound to play
-    // (assuming the sound can be played by the audio system)
-    File soundFile = new File(s);
-    AudioInputStream sound = AudioSystem.getAudioInputStream(soundFile);
-
-    // load the sound into memory (a Clip)
-    DataLine.Info info = new DataLine.Info(Clip.class, sound.getFormat());
-    Clip clip = (Clip) AudioSystem.getLine(info);
-    clip.open(sound);
-
-/*  Leaving this section in stops the JVM as soon as a sound plays... not good.
-    
-    //due to bug in Java Sound, explicitly exit the VM when
-    // the sound has stopped.
-    clip.addLineListener(new LineListener() {
-      public void update(LineEvent event) {
-        if (event.getType() == LineEvent.Type.STOP) {
-          event.getLine().close();
-        }
-      }
-    });
-*/
-    
-    // play the sound clip
-    clip.start();
-  }
+    public void play(URL u) throws Exception {   
+        AudioInputStream ais = AudioSystem.getAudioInputStream(u);
+        DataLine.Info info = new DataLine.Info(Clip.class, ais.getFormat());
+        Clip clip = (Clip) AudioSystem.getLine(info);
+        clip.open(ais);       
+        clip.start();
+    }  
     
 }

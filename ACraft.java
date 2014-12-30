@@ -199,16 +199,16 @@ public class ACraft {
     public void fire() {
         switch (weapon){
             case 0: bullets.add(new ABullet(x + width/2-2, y+5));
-                    ABoard.playSound(ABoard.bullet);
+                    ABoard.playSound(ABoard.Sbullet);
                     break;
             case 1: if(missiles.size()<ABoard.missileMax){
-                    ABoard.playSound(ABoard.missile);
+                    ABoard.playSound(ABoard.Smissile);
                     missiles.add(new AMissile(x + 22, y+10)); 
                     missiles.add(new AMissile(x - 1, y+10));
                     }
                     break;
             case 2: if(lasers.size() < 5){                       
-                        ABoard.playSound(ABoard.laser);
+                        ABoard.playSound(ABoard.Slaser);
                         lasers.add(new ALaser(x,y));
                         beams--;
                         if(beams == 0){

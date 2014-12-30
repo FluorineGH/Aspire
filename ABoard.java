@@ -24,11 +24,17 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Writer;
+import java.net.URL;
 import java.util.Random;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.DataLine;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.Timer;
@@ -58,8 +64,14 @@ public class ABoard extends JPanel implements ActionListener {
     private int bangframeStep = 0;
     private int frames = 0;
     private int frameStep = 0;
-   
-    static String impact, boom, prize, bullet, missile, laser, level2, level3, level4;
+
+    // Sound Files
+    public static InputStream ISBul;
+    public static Clip CBullet;
+    public static URL Simpact, Sboom, Sprize, Sbullet, Smissile, Slaser, Slevel2, Slevel3, Slevel4;
+    //static InputStream impact, boom, prize, bullet, missile, laser, level2, level3, level4;
+    static playSound Play;   
+   //static String impact, boom, prize, bullet, missile, laser, level2, level3, level4;
     
     // Scores stuff
     static String [] letters = {
@@ -102,7 +114,7 @@ public class ABoard extends JPanel implements ActionListener {
         else {
             System.out.println("DIRECTORY DOES NOT EXIST! Using current DIR.");
             scorecard = new File(System.getProperty("user.dir"),"scorecard.txt");
-        }        
+        }
     }
     
      public void paint(Graphics g) {
@@ -324,7 +336,7 @@ public class ABoard extends JPanel implements ActionListener {
         g2d.drawString("Lives: " + LIVES, 240, 20);
         g2d.drawString("Max Missiles: " + missileMax, 340, 20);
         g2d.drawString("Laserbolts left: " + craft.getBeams(), 520, 20);
-              
+       
         Toolkit.getDefaultToolkit().sync();
         g.dispose();
      }
@@ -341,14 +353,14 @@ public class ABoard extends JPanel implements ActionListener {
         // Set Level
         if(SCORE > 1000) {
             levelup = 2;
-            if(LEVEL2 == false) playSound(level2);
+            if(LEVEL2 == false) playSound(Slevel2);
             if(SCORE > 1200) levelup = 0;
             LEVEL2 = true;
             LEVEL = 2;
         }
         if(SCORE > 3000) {
             levelup = 3;
-            if(LEVEL3 == false) playSound(level3);
+            if(LEVEL3 == false) playSound(Slevel3);
             if(SCORE > 3300) levelup = 0;
             LEVEL3 = true;
             LEVEL = 3;
@@ -357,7 +369,7 @@ public class ABoard extends JPanel implements ActionListener {
             levelup = 4;
             setBackground(Color.DARK_GRAY);
             if(SCORE > 7900) levelup = 0;
-            if(LEVEL4 == false) playSound(level4);
+            if(LEVEL4 == false) playSound(Slevel4);
             LEVEL4 = true;
             LEVEL = 4;
         }
@@ -365,7 +377,7 @@ public class ABoard extends JPanel implements ActionListener {
             levelup = 5;
             setBackground(Color.DARK_GRAY);
             if(SCORE > 13500) levelup = 0;
-            if(LEVEL5 == false) playSound(level2);
+            if(LEVEL5 == false) playSound(Slevel2);
             LEVEL5 = true;
             LEVEL = 5;
         }
@@ -373,7 +385,7 @@ public class ABoard extends JPanel implements ActionListener {
             levelup = 6;
             setBackground(Color.DARK_GRAY);
             if(SCORE > 20600) levelup = 0;
-            if(LEVEL6 == false) playSound(level3);
+            if(LEVEL6 == false) playSound(Slevel3);
             LEVEL6 = true;
             LEVEL = 6;
         }
@@ -382,7 +394,7 @@ public class ABoard extends JPanel implements ActionListener {
             levelup = 7;
             setBackground(Color.black);
             if(SCORE > 30350) levelup = 0;
-            if(LEVEL7 == false) playSound(level4);
+            if(LEVEL7 == false) playSound(Slevel4);
             LEVEL7 = true;
             LEVEL = 7;
         }
@@ -482,7 +494,7 @@ public class ABoard extends JPanel implements ActionListener {
             Rectangle r2 = a.getBounds();
 
             if (r3.intersects(r2)) {
-                playSound(boom);
+                playSound(Sboom);
                 for(int i = 0;i<7;i++){
                     int rand1 = r.nextInt(40)-20;
                     int rand2 = r.nextInt(40)-20;
@@ -521,7 +533,7 @@ public class ABoard extends JPanel implements ActionListener {
                 }
                 
                 if (LEVEL < 7 && r4.intersects(r2)) {
-                    playSound(impact);
+                    playSound(Simpact);
                     bangs.add(new ABang(a.getX(),a.getY()));
                     b.setVisible(false);
                     a.setVisible(false);
@@ -564,7 +576,7 @@ public class ABoard extends JPanel implements ActionListener {
                 }
                 
                 if (LEVEL < 7 && r1.intersects(r2)) {
-                    playSound(impact);
+                    playSound(Simpact);
                     bangs.add(new ABang(a.getX(),a.getY()));
                     m.setVisible(false);
                     a.setVisible(false);
@@ -607,7 +619,7 @@ public class ABoard extends JPanel implements ActionListener {
                 }
                 
                 if (LEVEL < 7 && r6.intersects(r2)) {
-                    playSound(impact);
+                    playSound(Simpact);
                     bangs.add(new ABang(a.getX(),a.getY()));
                     a.setVisible(false);
                     SCORE+=10*LEVEL;
@@ -626,7 +638,7 @@ public class ABoard extends JPanel implements ActionListener {
             Rectangle r5 = p.getBounds();
             
             if(r5.intersects(r3)) {
-                playSound(prize);
+                playSound(Sprize);
                 craft.setWeapon(p.getT());
                 p.setVisible(false);
                 SCORE+=50;
@@ -641,7 +653,7 @@ public class ABoard extends JPanel implements ActionListener {
             Rectangle r6 = b.getBounds();
             
             if(r6.intersects(r3)) {
-                playSound(boom);
+                playSound(Sboom);
                 for(int j = 0;j<7;j++){
                     int rand1 = r.nextInt(40)-20;
                     int rand2 = r.nextInt(40)-20;
@@ -701,34 +713,33 @@ public class ABoard extends JPanel implements ActionListener {
         bang[0] = new ImageIcon(this.getClass().getResource("img/bang0.png")).getImage();
         bang[1] = new ImageIcon(this.getClass().getResource("img/bang1.png")).getImage();
         bang[2] = new ImageIcon(this.getClass().getResource("img/bang2.png")).getImage();
-        bang[3] = new ImageIcon(this.getClass().getResource("img/bang3.png")).getImage();
+        bang[3] = new ImageIcon(this.getClass().getResource("img/bang3.png")).getImage();        
     }
     
-    private void loadSound(){           
-        impact = "C:\\Users\\jcalvert\\Documents\\NetBeansProjects\\Aspire\\src\\aspire\\sound\\impact.wav";
-        boom = "C:\\Users\\jcalvert\\Documents\\NetBeansProjects\\Aspire\\src\\aspire\\sound\\boom.wav";
-        prize = "C:\\Users\\jcalvert\\Documents\\NetBeansProjects\\Aspire\\src\\aspire\\sound\\prize.wav";
-        bullet = "C:\\Users\\jcalvert\\Documents\\NetBeansProjects\\Aspire\\src\\aspire\\sound\\bullet.wav";
-        missile = "C:\\Users\\jcalvert\\Documents\\NetBeansProjects\\Aspire\\src\\aspire\\sound\\missile.wav";
-        laser = "C:\\Users\\jcalvert\\Documents\\NetBeansProjects\\Aspire\\src\\aspire\\sound\\laser.wav";
-        level2 = "C:\\Users\\jcalvert\\Documents\\NetBeansProjects\\Aspire\\src\\aspire\\sound\\level2.wav";
-        level3 = "C:\\Users\\jcalvert\\Documents\\NetBeansProjects\\Aspire\\src\\aspire\\sound\\level3.wav";
-        level4 = "C:\\Users\\jcalvert\\Documents\\NetBeansProjects\\Aspire\\src\\aspire\\sound\\level4.wav";
-        
+    private void loadSound(){       
+        Simpact = getClass().getResource("sound/impact.wav");
+        Sboom = getClass().getResource("sound/boom.wav");
+        Sprize = getClass().getResource("sound/prize.wav");
+        Sbullet = getClass().getResource("sound/bullet.wav");        
+        Smissile = getClass().getResource("sound/missile.wav");
+        Slaser = getClass().getResource("sound/laser.wav");
+        Slevel2 = getClass().getResource("sound/level2.wav");
+        Slevel3 = getClass().getResource("sound/level3.wav");
+        Slevel4 = getClass().getResource("sound/level4.wav");     
     }
     
-    static void playSound(String s){
-        playSound Play = new playSound();
+     static void playSound(URL u){
+        playSound Player = new playSound();
         try{
-        Play.play(s);
-        }catch (Exception e){
+            Player.play(u);            
+       }catch (Exception e){
             e.printStackTrace();
         }
     }
-    
+          
     private void scoreCard(Graphics2D g){
         // Grab the High Score list from file
-        if(scores.size() == 0) readScores();
+        if(scores.isEmpty()) readScores();
         // Print old High Score List       
         g.setFont(new Font("Arial", Font.BOLD, 20));
         g.setColor(Color.red);
